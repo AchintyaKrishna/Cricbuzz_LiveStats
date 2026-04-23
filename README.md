@@ -75,7 +75,7 @@ RAPIDAPI_KEY="your_api_key_here"
 
 ## 🎥 Demo Video
 
-[![Watch the video](https://youtu.be/9SQNvkZtwzg)
+![Watch the video](https://youtu.be/9SQNvkZtwzg)
 
 ## 🌐 Live App
 
