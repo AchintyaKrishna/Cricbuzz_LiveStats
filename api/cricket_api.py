@@ -1,16 +1,14 @@
 import requests
 import os
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
+API_KEY = os.getenv("RAPIDAPI_KEY") or st.secrets.get("RAPIDAPI_KEY")
 
-API_KEY = os.getenv("RAPIDAPI_KEY")
-
-BASE_URL = "https://cricbuzz-cricket2.p.rapidapi.com"
+BASE_URL = "https://cricket-live-line-advance.p.rapidapi.com"
 
 HEADERS = {
     "X-RapidAPI-Key": API_KEY,
-    "X-RapidAPI-Host": "cricbuzz-cricket2.p.rapidapi.com"
+    "X-RapidAPI-Host": "cricket-live-line-advance.p.rapidapi.com"
 }
 
 
