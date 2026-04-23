@@ -1,7 +1,6 @@
 import requests
 import os
 import streamlit as st
-from typing import List, Dict, Any
 
 
 def get_headers():
@@ -12,7 +11,7 @@ def get_headers():
     }
 
 
-def get_live_matches() -> List[Dict[str, Any]]:
+def get_live_matches():
     url = "https://cricket-live-line-advance.p.rapidapi.com/competitionMatches"
 
     try:
@@ -23,10 +22,9 @@ def get_live_matches() -> List[Dict[str, Any]]:
             return []
 
         data = res.json()
+        items = data.get("response", {}).get("items", [])
 
         matches = []
-
-        items = data.get("response", {}).get("items", [])
 
         for match in items:
             short_title = match.get("short_title", "")
@@ -40,9 +38,7 @@ def get_live_matches() -> List[Dict[str, Any]]:
                 "venue": match.get("subtitle"),
                 "date": match.get("date_start"),
                 "team1": teams[0],
-                "team2": teams[1] if len(teams) > 1 else "",
-                "team1_score": {},
-                "team2_score": {}
+                "team2": teams[1] if len(teams) > 1 else ""
             })
 
         return matches
