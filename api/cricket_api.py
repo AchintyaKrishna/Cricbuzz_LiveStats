@@ -1,47 +1,79 @@
 import requests
-import os
-import streamlit as st
 
+API_KEY = "43523bfda8msh3c00f7d97d09d73p124f4ajsn15b32b4b6bf9"
 
-def get_headers():
-    api_key = os.getenv("RAPIDAPI_KEY") or st.secrets.get("RAPIDAPI_KEY")
-    return {
-        "X-RapidAPI-Key": api_key,
-        "X-RapidAPI-Host": "cricket-live-line-advance.p.rapidapi.com"
-    }
+BASE_URL = "https://cricket-live-line-advance.p.rapidapi.com/competitions/129438/matches?paged=1&per_page=50"
+
+HEADERS = {
+    "X-RapidAPI-Key": API_KEY,
+    "X-RapidAPI-Host": "cricket-live-line-advance.p.rapidapi.com"
+}
 
 
 def get_live_matches():
-    url = "https://cricket-live-line-advance.p.rapidapi.com/competitionMatches"
+    url = f"{BASE_URL}/matches"
 
     try:
-        headers = get_headers()
-        res = requests.get(url, headers=headers, timeout=10)
-
-        if res.status_code != 200:
-            return []
-
+        res = requests.get(url, headers=HEADERS, timeout=10)
         data = res.json()
-        items = data.get("response", {}).get("items", [])
+
+        if data.get("status") != "ok":
+            print("API returned error")
+            return []
 
         matches = []
 
-        for match in items:
-            short_title = match.get("short_title", "")
-            teams = short_title.split(" vs ") if " vs " in short_title else ["", ""]
+        items = data.get("response", {}).get("items", [])
 
-            matches.append({
-                "match_id": match.get("match_id"),
-                "match_desc": match.get("title"),
-                "match_type": match.get("format_str"),
-                "status": match.get("status_str"),
-                "venue": match.get("subtitle"),
-                "date": match.get("date_start"),
-                "team1": teams[0],
-                "team2": teams[1] if len(teams) > 1 else ""
-            })
+        for m in items:
+            try:
+                team1 = m.get("teama", {}).get("name", "Team A")
+                team2 = m.get("teamb", {}).get("name", "Team B")
+
+                score1_raw = m.get("teama", {}).get("scores", "")
+                score2_raw = m.get("teamb", {}).get("scores", "")
+
+                overs1 = m.get("teama", {}).get("overs", "0")
+                overs2 = m.get("teamb", {}).get("overs", "0")
+
+                # ---------- SAFE SCORE PARSE ----------
+                def parse_score(score):
+                    try:
+                        if "/" in score:
+                            r, w = score.split("/")
+                            return int(r), int(w)
+                        return 0, 0
+                    except:
+                        return 0, 0
+
+                r1, w1 = parse_score(score1_raw)
+                r2, w2 = parse_score(score2_raw)
+
+                match_data = {
+                    "id": m.get("match_id"),
+                    "name": m.get("title"),
+                    "matchType": m.get("format_str"),
+                    "status": m.get("status_str"),
+                    "venue": m.get("venue", {}).get("name", ""),
+                    "date": m.get("date_start_ist"),
+
+                    "teams": [team1, team2],
+
+                    # ✅ IMPORTANT (used in your app)
+                    "score": [
+                        {"r": r1, "w": w1, "o": float(overs1) if overs1 else 0},
+                        {"r": r2, "w": w2, "o": float(overs2) if overs2 else 0}
+                    ]
+                }
+
+                matches.append(match_data)
+
+            except Exception as e:
+                print("Error parsing match:", e)
+                continue
 
         return matches
 
-    except Exception:
+    except Exception as e:
+        print("API ERROR:", e)
         return []
