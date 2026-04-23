@@ -1,17 +1,23 @@
 import requests
 
-API_KEY = "43523bfda8msh3c00f7d97d09d73p124f4ajsn15b32b4b6bf9"
+def get_api_key():
+    key = os.getenv("RAPIDAPI_KEY")
+    if key:
+        return key
+    try:
+        import streamlit as st
+        return st.secrets["RAPIDAPI_KEY"]
+    except:
+        return None
 
-BASE_URL = "https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1"
+API_KEY = get_api_key()
 
+BASE_URL = "https://cricket-live-line-advance.p.rapidapi.com/competitions/129438/matches?paged=1&per_page=50"
 
-def get_overs_data(match_id: str):
-    url = f"{BASE_URL}/{match_id}/overs"
-
-    headers = {
-        "X-RapidAPI-Key": API_KEY,
-        "X-RapidAPI-Host": "cricbuzz-cricket.p.rapidapi.com"
-    }
+HEADERS = {
+    "X-RapidAPI-Key": API_KEY,
+    "X-RapidAPI-Host": "cricket-live-line-advance.p.rapidapi.com"
+}
 
     try:
         res = requests.get(url, headers=headers)
