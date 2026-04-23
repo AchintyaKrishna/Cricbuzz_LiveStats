@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 from utils.cache import get_cached_matches
 
-
-# ---------- STATUS CLEAN ----------
 def clean_status(status: str) -> str:
     if not status:
         return "Other"
@@ -22,7 +20,7 @@ def clean_status(status: str) -> str:
 
 
 def show():
-    # ✅ UPDATED TITLE
+
     st.markdown('<div class="title">📊 Cricket Match Insights Dashboard</div>', unsafe_allow_html=True)
 
     matches = get_cached_matches()
@@ -31,7 +29,6 @@ def show():
         st.warning("No data available from API")
         return
 
-    # ---------- DATA ----------
     data = []
 
     for m in matches:
@@ -54,32 +51,27 @@ def show():
 
     df = pd.DataFrame(data)
 
-    # ---------- KPIs ----------
     live_count = len(df[df["Status"] == "Live"])
 
     col1, col2, col3, col4, col5 = st.columns(5)
 
     col1.metric("Total Matches", len(df))
-    col2.metric("Live Matches", live_count)  # ✅ NEW
+    col2.metric("Live Matches", live_count)  
     col3.metric("Teams", len(set(df["Team1"]).union(set(df["Team2"]))))
     col4.metric("Match Types", df["Type"].nunique())
     col5.metric("Venues", df["Venue"].nunique())
 
-    # ✅ Show warning if no live matches
     if live_count == 0:
         st.info("No live matches right now. Showing recent & upcoming matches.")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ---------- CHARTS ----------
     col1, col2 = st.columns(2)
 
-    # Match Type Distribution
     type_count = df["Type"].value_counts().reset_index()
     type_count.columns = ["Type", "Count"]
 
     if len(type_count) == 1:
-        # ✅ Better UX when only one type
         st.info(f"Only {type_count.iloc[0]['Type']} matches available currently")
 
     fig1 = px.bar(
@@ -90,7 +82,6 @@ def show():
     )
     col1.plotly_chart(fig1, use_container_width=True)
 
-    # Status Distribution
     status_count = df["Status"].value_counts().reset_index()
     status_count.columns = ["Status", "Count"]
 
@@ -105,7 +96,6 @@ def show():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ---------- MATCH LIST ----------
     st.subheader("📋 All Matches")
 
     for row in data:
